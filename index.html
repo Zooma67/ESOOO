@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#171927">
+  <title>11:11 — أمنية صغيرة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #171927;
+      --panel: #222438;
+      --ink: #f8f4f0;
+      --muted: #b9b5c5;
+      --pink: #f3a6bd;
+      --lilac: #b9a7f5;
+      --line: #ffffff18
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 80% 0%, #49304d 0, transparent 36%), radial-gradient(ellipse at 5% 65%, #283b50 0, transparent 30%), var(--bg);
+      color: var(--ink);
+      font-family: Alexandria, sans-serif;
+      overflow-x: hidden
+    }
+
+    button {
+      font: inherit
+    }
+
+    .wrap {
+      width: min(1080px, 90%);
+      margin: auto
+    }
+
+    #heartCanvas {
+      position: fixed;
+      inset: 0;
+      z-index: 4;
+      width: 100%;
+      height: 100%;
+      pointer-events: none
+    }
+
+    .cover {
+      position: relative;
+      width: min(1080px, 94%);
+      min-height: min(78svh, 780px);
+      margin: 18px auto 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: #171927
+    }
+
+    .cover-image-trigger {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer
+    }
+
+    .cover-image-trigger img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 35%;
+      transition: transform 1s ease
+    }
+
+    .cover-image-trigger:hover img {
+      transform: scale(1.025)
+    }
+
+    .cover-image-trigger:focus-visible,
+    .cover-message:focus-visible,
+    .memory-controls button:focus-visible,
+    .dialog-close:focus-visible {
+      outline: 2px solid var(--pink);
+      outline-offset: -5px
+    }
+
+    .cover::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, #17192730 0%, #17192770 46%, #171927ed 100%)
+    }
+
+    .cover-content {
+      position: relative;
+      z-index: 1;
+      width: min(520px, 100%);
+      padding: min(43vh, 320px) 20px 34px;
+      pointer-events: none
+    }
+
+    .cover-flower {
+      color: var(--pink);
+      font-size: 32px;
+      margin-bottom: 4px
+    }
+
+    .cover h1 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 7vw, 56px);
+      font-weight: 500;
+      text-shadow: 0 3px 22px #0009
+    }
+
+    .cover p {
+      margin: 0 0 24px;
+      color: #f0e9f2;
+      font-size: 14px
+    }
+
+    .cover-message {
+      pointer-events: auto;
+      border: 1px solid #ffffff50;
+      background: #ffffff17;
+      color: var(--ink);
+      backdrop-filter: blur(8px)
+    }
+
+    .cover-hint {
+      position: absolute;
+      z-index: 1;
+      bottom: 18px;
+      inset-inline: 0;
+      color: #ffffffc9;
+      font-size: 11px;
+      pointer-events: none
+    }
+
+    .memory-stage {
+      position: relative
+    }
+
+    .memory-flower {
+      position: absolute;
+      z-index: 2;
+      top: -30px;
+      color: #ff9fbd;
+      text-shadow: 0 2px 12px #f3548b99;
+      pointer-events: none;
+      animation: memory-flower-fall var(--fall-time, 2.8s) ease-in forwards
+    }
+
+    @keyframes memory-flower-fall {
+      to {
+        transform: translate3d(var(--flower-drift), 70svh, 0) rotate(420deg);
+        opacity: 0
+      }
+    }
+
+    .memory-dialog,
+    .message-dialog {
+      width: min(900px, calc(100% - 28px));
+      max-width: none;
+      max-height: min(92svh, 900px);
+      padding: 0;
+      overflow: auto;
+      color: var(--ink);
+      border: 1px solid #ffffff24;
+      border-radius: 26px;
+      background: linear-gradient(145deg, #29283e, #171927);
+      box-shadow: 0 30px 100px #000b
+    }
+
+    .memory-dialog[open],
+    .message-dialog[open] {
+      animation: dialog-appear .28s ease-out both
+    }
+
+    .memory-dialog::backdrop,
+    .message-dialog::backdrop {
+      background: #090a12d9;
+      backdrop-filter: blur(12px)
+    }
+
+    @keyframes dialog-appear {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(.97)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    .memory-shell {
+      padding: clamp(16px, 4vw, 30px)
+    }
+
+    .memory-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px
+    }
+
+    .memory-count {
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .dialog-close {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: #ffffff0d;
+      color: var(--ink);
+      font-size: 22px;
+      cursor: pointer
+    }
+
+    .memory-stage {
+      min-height: min(62svh, 650px);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 20px;
+      background: radial-gradient(ellipse, #3e304d, #141520 75%)
+    }
+
+    .memory-card {
+      width: min(100%, 430px);
+      max-height: min(62svh, 650px);
+      padding: 10px 10px 16px;
+      border: 1px solid #ffffff35;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 24px 70px #0008;
+      transform: rotate(var(--tilt, 0deg));
+      animation: memory-scatter .72s cubic-bezier(.16, 1, .3, 1) both
+    }
+
+    .memory-card img,
+    .memory-card video {
+      display: block;
+      width: 100%;
+      height: min(58svh, 580px);
+      object-fit: contain;
+      border-radius: 10px;
+      background: #171927;
+      color: white
+    }
+
+    .memory-card figcaption {
+      padding-top: 10px;
+      color: #423b4b;
+      text-align: center;
+      font-size: 12px
+    }
+
+    .memory-video-toggle {
+      display: block;
+      margin: 12px auto 0;
+      padding: 8px 18px;
+      border: 0;
+      border-radius: 22px;
+      background: linear-gradient(110deg, var(--pink), #d6c1ff);
+      color: #211b2a;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    @keyframes memory-scatter {
+      from {
+        opacity: 0;
+        transform: translate(var(--scatter-x), var(--scatter-y)) rotate(var(--scatter-tilt)) scale(.42)
+      }
+
+      to {
+        opacity: 1;
+        transform: rotate(var(--tilt, 0deg)) scale(1)
+      }
+    }
+
+    .memory-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 18px
+    }
+
+    .memory-controls button {
+      min-width: 46px;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: #ffffff10;
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer
+    }
+
+    .memory-controls button:hover {
+      background: #ffffff20
+    }
+
+    .message-dialog {
+      width: min(650px, calc(100% - 28px))
+    }
+
+    .message-shell {
+      padding: clamp(22px, 6vw, 48px)
+    }
+
+    .message-shell h2 {
+      margin: 0 0 18px;
+      color: var(--pink);
+      font-size: 24px;
+      font-weight: 500
+    }
+
+    .message-shell p {
+      color: #e9e3ed;
+      font-size: 14px;
+      line-height: 2.3
+    }
+
+    .message-shell .signature {
+      color: var(--pink);
+      margin-top: 22px;
+      font-size: 13px
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0
+    }
+
+    .brand {
+      font: 700 14px "DM Sans";
+      letter-spacing: 3px;
+      color: var(--pink)
+    }
+
+    .music {
+      border: 1px solid var(--line);
+      background: #ffffff0c;
+      color: var(--ink);
+      border-radius: 30px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: .25s
+    }
+
+    .music-status {
+      position: absolute;
+      top: 100%;
+      inset-inline-end: 0;
+      width: max-content;
+      max-width: 220px;
+      color: var(--pink);
+      font-size: 10px
+    }
+
+    .music:hover,
+    .btn:hover {
+      transform: translateY(-2px);
+      background: #ffffff20
+    }
+
+    .btn {
+      display: inline-block;
+      text-decoration: none;
+      color: #211b2a;
+      background: linear-gradient(110deg, var(--pink), #d6c1ff);
+      border: 0;
+      border-radius: 30px;
+      padding: 13px 24px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: .25s
+    }
+
+    .section {
+      padding: 50px 0 65px
+    }
+
+    .section-head {
+      text-align: center;
+      margin-bottom: 30px
+    }
+
+    .section-head small {
+      color: var(--pink);
+      letter-spacing: 2px;
+      font: 600 11px "DM Sans"
+    }
+
+    .section-head h2 {
+      font-size: 25px;
+      font-weight: 500;
+      margin: 10px 0
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 2
+    }
+
+    .caption {
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 15px
+    }
+
+    .footer {
+      text-align: center;
+      color: #817d90;
+      font: 10px "DM Sans";
+      padding: 20px;
+      border-top: 1px solid var(--line)
+    }
+
+    .petal {
+      position: fixed;
+      top: -30px;
+      z-index: 5;
+      pointer-events: none;
+      animation: fall linear forwards;
+      opacity: .8
+    }
+
+    @keyframes fall {
+      to {
+        transform: translate3d(var(--drift), 110vh, 0) rotate(600deg);
+        opacity: 0
+      }
+    }
+
+    .wish-section {
+      max-width: 760px;
+      margin: auto;
+      padding: clamp(22px, 5vw, 40px);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(145deg, #ffffff12, #ffffff05)
+    }
+
+    .wish-form {
+      display: grid;
+      gap: 12px
+    }
+
+    .wish-form label {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .wish-form textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #171927aa;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.8
+    }
+
+    .wish-form textarea:focus-visible,
+    .wish-form button:focus-visible,
+    .wish-delete:focus-visible {
+      outline: 2px solid var(--pink);
+      outline-offset: 3px
+    }
+
+    .wish-form .btn {
+      justify-self: start
+    }
+
+    .wish-status {
+      min-height: 1.5em;
+      color: var(--pink);
+      font-size: 12px
+    }
+
+    .wish-list {
+      display: grid;
+      gap: 12px;
+      padding: 0;
+      margin: 20px 0 0;
+      list-style: none
+    }
+
+    .wish-entry {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #ffffff09
+    }
+
+    .wish-entry p {
+      margin: 0;
+      line-height: 1.9;
+      overflow-wrap: anywhere
+    }
+
+    .wish-entry footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 11px
+    }
+
+    .wish-delete {
+      border: 0;
+      padding: 4px 8px;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--pink);
+      font: inherit;
+      cursor: pointer
+    }
+
+    .music-card {
+      margin: 45px auto 0;
+      max-width: 500px;
+      text-align: center;
+      padding: 30px 20px;
+      border-radius: 25px;
+      background: #ffffff10;
+      border: 1px solid #ffffff25;
+      backdrop-filter: blur(15px);
+    }
+
+    .music-icon {
+      font-size: 35px;
+      color: #c5b6ff;
+    }
+
+    .music-card h3 {
+      font-weight: 500;
+    }
+
+    .music-card p {
+      color: #c1c6df;
+      font-size: 12px;
+    }
+
+    .music-card audio {
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    @media(max-width:700px) {
+      .cover {
+        min-height: 76svh;
+        width: 100%;
+        margin-top: 0;
+        border-radius: 0 0 24px 24px
+      }
+
+      .cover-content {
+        padding-top: 36svh
+      }
+
+      .memory-stage {
+        min-height: 58svh
+      }
+
+      .memory-card img,
+      .memory-card video {
+        height: 52svh
+      }
+    }
+
+    @media(prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="heartCanvas" aria-hidden="true"></canvas>
+  <header class="wrap nav">
+    <div class="brand">11:11 / A LITTLE WISH</div>
+    <div style="position:relative">
+      <button class="music" id="musicBtn" type="button">♫ تشغيل الموسيقى</button>
+      <span class="music-status" id="musicStatus" role="status" aria-live="polite"></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="cover" aria-labelledby="coverTitle">
+      <button class="cover-image-trigger" id="openMemories" type="button" aria-label="دوسي هنا يا حبيبي وشوفي أيامنا سوا">
+        <img src="assets/images/photo1.jpg.jpg" alt="أميرتك وهي تحمل باقة ورد" width="720" height="1280"
+          fetchpriority="high">
+      </button>
+      <div class="cover-content">
+        <div class="cover-flower" aria-hidden="true">✿</div>
+        <h1 id="coverTitle">أنتِ أميرتي الوحيدة</h1>
+        <p>افتكري دايمًا إنك أنتِ أمنيتي الوحيدة ♡</p>
+        <button class="btn cover-message" id="openMessage" type="button">افتحي قلبي وشوفي شايلك إيه</button>
+      </div>
+      <div class="cover-hint">دوسي هنا يا حبيبي وشوفي أيامنا سوا ✨</div>
+    </section>
+
+    <section class="section wrap" id="wishes" aria-labelledby="wishesTitle">
+      <div class="section-head"><small>A LITTLE WISH</small>
+        <h2 id="wishesTitle">أمنيتي الوحيدة انت </h2>
+        <p>خليكي فاكرة إنك أنتِ أمنيتي الوحيدة… اكتبي أمنية حلوة وخليها ذكرى ♡</p>
+      </div>
+      <div class="wish-section">
+        <form class="wish-form" id="wishForm">
+          <label for="wishInput">أمنيتك إيه؟</label>
+          <textarea id="wishInput" name="wish" maxlength="240" required
+            placeholder="اكتبي أمنية حلوة لنفسك أو لينا..."></textarea>
+          <button class="btn" type="submit">احفظي أمنيتك ✨</button>
+          <div class="wish-status" id="wishStatus" role="status" aria-live="polite"></div>
+        </form>
+        <ul class="wish-list" id="wishList" aria-label="الأمنيات المحفوظة"></ul>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">MADE WITH CARE · 11:11</footer>
+
+  <dialog class="memory-dialog" id="memoryDialog" aria-labelledby="memoryTitle">
+    <div class="memory-shell">
+      <div class="memory-topbar">
+        <span class="memory-count" id="memoryCount" aria-live="polite"></span>
+        <button class="dialog-close" id="closeMemories" type="button" aria-label="إغلاق الذكريات">×</button>
+      </div>
+      <h2 id="memoryTitle" class="section-head">ذكرياتنا ♡</h2>
+      <div class="memory-stage" id="memoryStage" aria-live="polite"></div>
+      <div class="memory-controls">
+        <button id="memoryPrev" type="button" aria-label="الذكرى السابقة">السابق</button>
+        <button id="memoryNext" type="button" aria-label="الذكرى التالية">التالي</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="message-dialog" id="messageDialog" aria-labelledby="messageTitle">
+    <div class="message-shell">
+      <div class="memory-topbar">
+        <h2 id="messageTitle">رسالة صغيرة من حازم لإسراء</h2>
+        <button class="dialog-close" id="closeMessage" type="button" aria-label="إغلاق الرسالة">×</button>
+      </div>
+      <p>
+        وخليكي فاكرة دايمًا إنك أنتِ الحاجة الوحيدة اللي أنا عمري ما هعرف أبعد عنها،
+        وهفضل بحبها وأعمل كل حاجة عشان تبقي موجودة معايا.
+        ومهما حصل هفضل بحبك، ولا حبي ليكي عمره هيقل، ولا هحب غيرك ولا عايز غيرك.
+        بحبك💓
+      </p>
+      <div class="signature">— من حازم لإسراء 💓</div>
+    </div>
+  </dialog>
+
+  <audio id="bgMusic" src="assets/audio/AUDIO-2026-11-11-03-42-50.mp3" loop preload="none"></audio>
+  <script>
+    const audio = document.getElementById('bgMusic');
+    const musicBtn = document.getElementById('musicBtn');
+    const wishForm = document.getElementById('wishForm');
+    const wishInput = document.getElementById('wishInput');
+    const wishList = document.getElementById('wishList');
+    const wishStatus = document.getElementById('wishStatus');
+    const wishesStorageKey = '11-11-love-page-wishes';
+    const memoryDialog = document.getElementById('memoryDialog');
+    const memoryStage = document.getElementById('memoryStage');
+    const memoryCount = document.getElementById('memoryCount');
+    const musicStatus = document.getElementById('musicStatus');
+    const heartCanvas = document.getElementById('heartCanvas');
+    const heartContext = heartCanvas.getContext('2d');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let heartParticles = [];
+    let animationFrame;
+
+    // Add or remove one complete filename/object here; every asset stays optional.
+    const memories = [
+      'photo1.jpg.jpg',
+      'photo_1_2026-11-11_02-58-04.jpg',
+      'photo_2_2026-11-11_02-58-04.jpg',
+      'photo_2.jpj.jpg',
+      'photo3.jpj.jpg',
+      'photo_3_2026-11-11_02-58-04.jpg',
+      'photo_4_2026-11-11_02-38-16.jpg',
+      'photo_4_2026-11-11_02-58-04.jpg',
+      'photo_5_2026-11-11_02-38-16.jpg',
+      'photo_5_2026-11-11_02-58-04.jpg',
+      'photo_6_2026-11-11_02-38-16.jpg',
+      'photo_6_2026-11-11_02-58-04.jpg',
+      'photo_7_2026-11-11_02-38-16.jpg',
+      'photo_7_2026-11-11_02-58-04.jpg',
+      'photo_8_2026-11-11_02-38-16.jpg',
+      'photo_8_2026-11-11_02-58-04.jpg',
+      'photo_9_2026-11-11_02-38-16.jpg',
+      'photo_9_2026-11-11_02-58-04.jpg',
+      'photo_10_2026-11-11_02-38-16.jpg',
+      'photo_10_2026-11-11_02-58-04.jpg',
+      'photo_11_2026-11-11_02-38-16.jpg',
+      'photo_11_2026-11-11_02-58-04.jpg',
+      'photo_12_2026-11-11_02-38-16.jpg',
+      'photo_13_2026-11-11_02-38-16.jpg',
+      'photo_14_2026-11-11_02-38-16.jpg'
+    ].map((filename, index) => ({
+      type: 'image',
+      src: 'assets/images/' + filename,
+      caption: 'ذكرى ' + (index + 1)
+    })).concat([
+      { type: 'image', src: 'assets/images/photo_1_2026-11-11_03-46-15.jpg', caption: 'ذكرى جديدة 1' },
+      { type: 'image', src: 'assets/images/photo_2_2026-11-11_03-46-15.jpg', caption: 'ذكرى جديدة 2' },
+      { type: 'image', src: 'assets/images/photo_3_2026-11-11_03-46-15.jpg', caption: 'ذكرى جديدة 3' },
+      { type: 'image', src: 'assets/images/photo_4_2026-11-11_03-46-15.jpg', caption: 'ذكرى جديدة 4' },
+      { type: 'image', src: 'assets/images/photo_5_2026-11-11_03-46-15.jpg', caption: 'ذكرى جديدة 5' },
+      { type: 'image', src: 'assets/images/photo_6_2026-11-11_03-46-15.jpg', caption: 'ذكرى جديدة 6' },
+      { type: 'image', src: 'assets/images/photo_7_2026-11-11_03-46-15.jpg', caption: 'ذكرى جديدة 7' },
+      { type: 'image', src: 'assets/images/photo_8_2026-11-11_03-46-15.jpg', caption: 'ذكرى جديدة 8' },
+      { type: 'video', src: 'assets/images/video_2026-11-11_02-38-16.mp4', caption: 'فيديو ذكرى 1' },
+      { type: 'video', src: 'assets/images/video_2026-11-11_02-58-03.mp4', caption: 'فيديو ذكرى 2' }
+    ]);
+    let activeMemoryIndex = 0;
+
+    function updateMusicButton() {
+      const playing = !audio.paused;
+      musicBtn.textContent = playing ? 'Ⅱ إيقاف الموسيقى' : '♫ تشغيل الموسيقى';
+      musicStatus.textContent = playing ? 'الموسيقى شغالة ♡' : '';
+    }
+
+    async function playMusic() {
+      try {
+        await audio.play();
+        updateMusicButton();
+        return true;
+      } catch {
+        musicStatus.textContent = audio.error
+          ? 'تعذر قراءة ملف الصوت؛ افتحي الصفحة عبر Live Server وتحققي من المسار.'
+          : 'اضغطي على الغلاف لتشغيل الموسيقى ♫';
+        return false;
+      }
+    }
+
+    musicBtn.addEventListener('click', async () => {
+      if (audio.paused) {
+        await playMusic();
+      } else {
+        audio.pause();
+        updateMusicButton();
+      }
+    });
+    audio.addEventListener('play', updateMusicButton);
+    audio.addEventListener('pause', updateMusicButton);
+
+    function petals(count = 18) {
+      const symbols = ['✿', '❀', '🌸'];
+      for (let i = 0; i < count; i++) {
+        const petal = document.createElement('span');
+        petal.className = 'petal';
+        petal.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        petal.style.left = Math.random() * 100 + 'vw';
+        petal.style.fontSize = (12 + Math.random() * 17) + 'px';
+        petal.style.color = ['#f3a6bd', '#d6c1ff', '#fff0f5'][Math.floor(Math.random() * 3)];
+        petal.style.setProperty('--drift', (Math.random() * 180 - 90) + 'px');
+        petal.style.animationDuration = (5 + Math.random() * 5) + 's';
+        petal.style.animationDelay = (Math.random() * 1.5) + 's';
+        document.body.appendChild(petal);
+        setTimeout(() => petal.remove(), 11000);
+      }
+    }
+
+    function pointInsidePolygon(x, y, polygon) {
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const a = polygon[i], b = polygon[j];
+        const crosses = (a.y > y) !== (b.y > y)
+          && x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x;
+        if (crosses) inside = !inside;
+      }
+      return inside;
+    }
+
+    function createHeartParticles() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const count = width < 600 ? 5 : 8;
+
+      heartParticles = Array.from({ length: count }, (_, index) => {
+        const outline = Array.from({ length: 60 }, (_, point) => {
+          const angle = point / 60 * Math.PI * 2;
+          return {
+            x: 16 * Math.sin(angle) ** 3,
+            y: -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle)
+              - 2 * Math.cos(3 * angle) - Math.cos(4 * angle))
+          };
+        });
+        const dots = [];
+        for (let y = -16; y <= 6; y += 3) {
+          for (let x = -16; x <= 16; x += 3) {
+            if (pointInsidePolygon(x, y, outline)) dots.push({ x, y });
+          }
+        }
+        return {
+          dots,
+          x: width * ((index + 0.5) / count) + (Math.random() * 40 - 20),
+          y: height * (0.18 + Math.random() * 0.68),
+          size: width < 600 ? 1.15 : 1.45,
+          phase: Math.random() * Math.PI * 2,
+          drift: 0.25 + Math.random() * 0.35
+        };
+      });
+    }
+
+    function drawHearts(time = 0) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      heartContext.clearRect(0, 0, width, height);
+
+      heartParticles.forEach(heart => {
+        const x = heart.x + Math.sin(time / 1800 + heart.phase) * 9;
+        const y = heart.y + Math.sin(time / 1500 + heart.phase) * 12;
+        heartContext.fillStyle = '#ff365f9c';
+        heart.dots.forEach(dot => {
+          heartContext.beginPath();
+          heartContext.arc(x + dot.x * heart.size, y + dot.y * heart.size, heart.size, 0, Math.PI * 2);
+          heartContext.fill();
+        });
+        heartContext.fillStyle = '#fff0f4';
+        heartContext.font = '600 8px Alexandria, sans-serif';
+        heartContext.textAlign = 'center';
+        heartContext.textBaseline = 'middle';
+        heartContext.fillText('إسراء', x, y + 1);
+      });
+
+      if (!prefersReducedMotion && !document.hidden) {
+        animationFrame = requestAnimationFrame(drawHearts);
+      }
+    }
+
+    function startHeartAnimation() {
+      if (!heartContext) return;
+      cancelAnimationFrame(animationFrame);
+      const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+      heartCanvas.width = Math.round(window.innerWidth * ratio);
+      heartCanvas.height = Math.round(window.innerHeight * ratio);
+      heartCanvas.style.width = window.innerWidth + 'px';
+      heartCanvas.style.height = window.innerHeight + 'px';
+      heartContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+      createHeartParticles();
+      drawHearts();
+    }
+
+    function showerMemoryFlowers(count = 8) {
+      for (let i = 0; i < count; i++) {
+        const flower = document.createElement('span');
+        flower.className = 'memory-flower';
+        flower.setAttribute('aria-hidden', 'true');
+        flower.textContent = Math.random() > 0.5 ? '✿' : '❀';
+        flower.style.left = Math.random() * 100 + '%';
+        flower.style.fontSize = (18 + Math.random() * 15) + 'px';
+        flower.style.setProperty('--flower-drift', (Math.random() * 120 - 60) + 'px');
+        flower.style.setProperty('--fall-time', (2 + Math.random() * 1.5) + 's');
+        memoryStage.appendChild(flower);
+        flower.addEventListener('animationend', () => flower.remove(), { once: true });
+      }
+    }
+
+    function showMemory(index) {
+      activeMemoryIndex = (index + memories.length) % memories.length;
+      const memory = memories[activeMemoryIndex];
+      const frame = document.createElement('figure');
+      frame.className = 'memory-card';
+      frame.style.setProperty('--tilt', ((activeMemoryIndex % 5) - 2) * 2 + 'deg');
+      frame.style.setProperty('--scatter-x', (Math.random() * 140 - 70) + 'vw');
+      frame.style.setProperty('--scatter-y', (Math.random() * 100 - 50) + 'vh');
+      frame.style.setProperty('--scatter-tilt', (Math.random() * 50 - 25) + 'deg');
+
+      if (memory.type === 'video') {
+        const video = document.createElement('video');
+        video.playsInline = true;
+        video.preload = 'none';
+        video.muted = true;
+        video.defaultMuted = true;
+        video.volume = 0;
+        video.setAttribute('aria-label', memory.caption + ' بدون صوت');
+        video.addEventListener('volumechange', () => {
+          if (!video.muted || video.volume !== 0) {
+            video.muted = true;
+            video.volume = 0;
+          }
+        });
+        const source = document.createElement('source');
+        source.src = memory.src;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+        frame.appendChild(video);
+        const toggleVideo = document.createElement('button');
+        toggleVideo.className = 'memory-video-toggle';
+        toggleVideo.type = 'button';
+        toggleVideo.textContent = 'تشغيل الفيديو';
+        toggleVideo.setAttribute('aria-label', 'تشغيل ' + memory.caption + ' بدون صوت');
+        toggleVideo.addEventListener('click', async () => {
+          if (video.paused) {
+            try {
+              await video.play();
+              toggleVideo.textContent = 'إيقاف الفيديو';
+            } catch {
+              toggleVideo.textContent = 'تعذر تشغيل الفيديو';
+              toggleVideo.disabled = true;
+            }
+          } else {
+            video.pause();
+            toggleVideo.textContent = 'تشغيل الفيديو';
+          }
+        });
+        video.addEventListener('error', () => {
+          toggleVideo.textContent = 'الفيديو مش موجود';
+          toggleVideo.disabled = true;
+        });
+        video.addEventListener('ended', () => {
+          toggleVideo.textContent = 'تشغيل الفيديو';
+        });
+        frame.appendChild(toggleVideo);
+      } else {
+        const image = document.createElement('img');
+        image.src = memory.src;
+        image.alt = memory.caption;
+        image.loading = 'eager';
+        image.decoding = 'async';
+        image.addEventListener('error', () => {
+          image.hidden = true;
+          caption.textContent = 'الصورة مش موجودة. احذفي اسمها من قائمة الذكريات.';
+        }, { once: true });
+        frame.appendChild(image);
+      }
+
+      const caption = document.createElement('figcaption');
+      caption.textContent = memory.caption;
+      frame.appendChild(caption);
+      memoryStage.replaceChildren(frame);
+      memoryCount.textContent = (activeMemoryIndex + 1) + ' / ' + memories.length;
+      showerMemoryFlowers(12);
+    }
+
+    document.getElementById('openMemories').addEventListener('click', () => {
+      void playMusic();
+      showMemory(0);
+      memoryDialog.showModal();
+    });
+
+    document.getElementById('closeMemories').addEventListener('click', () => memoryDialog.close());
+    memoryDialog.addEventListener('close', () => memoryStage.replaceChildren());
+    document.getElementById('memoryPrev').addEventListener('click', () => showMemory(activeMemoryIndex - 1));
+    document.getElementById('memoryNext').addEventListener('click', () => showMemory(activeMemoryIndex + 1));
+    memoryDialog.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft') showMemory(activeMemoryIndex + 1);
+      if (event.key === 'ArrowRight') showMemory(activeMemoryIndex - 1);
+    });
+
+    const messageDialog = document.getElementById('messageDialog');
+    document.getElementById('openMessage').addEventListener('click', () => messageDialog.showModal());
+    document.getElementById('closeMessage').addEventListener('click', () => messageDialog.close());
+
+    audio.addEventListener('error', () => {
+      musicStatus.textContent = 'تعذر قراءة ملف الصوت؛ افتحي الصفحة عبر Live Server وتحققي من المسار.';
+    });
+
+    window.addEventListener('resize', startHeartAnimation);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) cancelAnimationFrame(animationFrame);
+      else startHeartAnimation();
+    });
+
+    startHeartAnimation();
+    petals(10);
+    if (!prefersReducedMotion) {
+      window.setInterval(() => petals(2), 1800);
+    }
+
+    function readWishes() {
+      const savedWishes = localStorage.getItem(wishesStorageKey);
+      if (!savedWishes) return [];
+
+      const wishes = JSON.parse(savedWishes);
+      if (!Array.isArray(wishes) || wishes.some(wish =>
+        typeof wish.text !== 'string' || typeof wish.createdAt !== 'string' || typeof wish.id !== 'string'
+      )) {
+        throw new Error('سجل الأمنيات المحفوظ غير صالح.');
+      }
+      return wishes;
+    }
+
+    function renderWishes() {
+      wishList.replaceChildren();
+      try {
+        const wishes = readWishes();
+        if (wishes.length === 0) {
+          const emptyMessage = document.createElement('li');
+          emptyMessage.className = 'caption';
+          emptyMessage.textContent = 'لسه مفيش أمنيات… اكتبي أول أمنية ♡';
+          wishList.appendChild(emptyMessage);
+          return;
+        }
+
+        wishes.forEach(wish => {
+          const item = document.createElement('li');
+          item.className = 'wish-entry';
+          const text = document.createElement('p');
+          text.textContent = wish.text;
+          const footer = document.createElement('footer');
+          const date = document.createElement('time');
+          date.dateTime = wish.createdAt;
+          const createdAt = new Date(wish.createdAt);
+          date.textContent = Number.isNaN(createdAt.getTime())
+            ? 'أمنية محفوظة'
+            : new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }).format(createdAt);
+          const deleteButton = document.createElement('button');
+          deleteButton.className = 'wish-delete';
+          deleteButton.type = 'button';
+          deleteButton.textContent = 'حذف';
+          deleteButton.setAttribute('aria-label', 'حذف الأمنية: ' + wish.text);
+          deleteButton.addEventListener('click', () => deleteWish(wish.id));
+          footer.append(date, deleteButton);
+          item.append(text, footer);
+          wishList.appendChild(item);
+        });
+      } catch (error) {
+        wishStatus.textContent = error instanceof Error
+          ? error.message
+          : 'تعذر قراءة سجل الأمنيات من هذا الجهاز.';
+      }
+    }
+
+    function deleteWish(id) {
+      try {
+        const wishes = readWishes().filter(wish => wish.id !== id);
+        localStorage.setItem(wishesStorageKey, JSON.stringify(wishes));
+        wishStatus.textContent = 'اتحذفت الأمنية من السجل.';
+        renderWishes();
+      } catch {
+        wishStatus.textContent = 'تعذر تحديث سجل الأمنيات. جرّبي مرة تانية.';
+      }
+    }
+
+    wishForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const text = wishInput.value.trim();
+      if (!text) {
+        wishStatus.textContent = 'اكتبي أمنيتك الأول.';
+        wishInput.focus();
+        return;
+      }
+
+      try {
+        const wishes = readWishes();
+        wishes.unshift({ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() });
+        localStorage.setItem(wishesStorageKey, JSON.stringify(wishes));
+        wishInput.value = '';
+        wishStatus.textContent = 'اتحفظت أمنيتك في السجل ♡';
+        renderWishes();
+        petals(12);
+      } catch {
+        wishStatus.textContent = 'تعذر حفظ الأمنية على هذا الجهاز. تأكدي من تفعيل مساحة التخزين في المتصفح.';
+      }
+    });
+
+    renderWishes();
+    void playMusic();
+  </script>
+</body>
+
+</html>
